@@ -1,0 +1,12 @@
+tensorflow
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+pillow
+opencv-python
+scikit-multilearn
+wandb
+pyyaml
+jupyter

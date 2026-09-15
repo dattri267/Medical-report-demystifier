@@ -216,3 +216,30 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Project-specific (Medical Report Demystifier) ---
+# Dataset - too large / not ours to redistribute
+data/raw/
+data/processed/
+*.csv
+!data/splits/*.csv
+
+# Model artifacts - large binary files, keep out of git for now
+models/checkpoints/
+models/registry/
+models/final/
+*.h5
+*.keras
+*.ckpt
+
+# Regenerated outputs
+outputs/figures/*.png
+outputs/gradcam/*.png
+outputs/metrics/*.json
+outputs/metrics/*.csv
+
+# Experiment tracking
+wandb/
+
+# OS junk
+.DS_Store
