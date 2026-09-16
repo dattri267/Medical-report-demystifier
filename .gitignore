@@ -1,36 +1,38 @@
-### Java / Spring Boot / Maven ###
+﻿### Java / Spring Boot / Maven ###
 target/
 *.class
 *.jar
 *.war
 !.mvn/wrapper/maven-wrapper.jar
-HELP.md
 
 ### IDEs ###
 .idea/
 *.iml
 .vscode/
-.settings/
-.classpath
-.project
 
-### Python (vision-service) ###
-venv/
+### Spring Boot secrets ###
+backend/src/main/resources/application-secrets.properties
+
+### Python ###
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*.class
+.venv/
+venv/
+env/
+ENV/
+
+### Jupyter ###
 .ipynb_checkpoints/
 
-### ML artifacts — too large for git ###
-*.h5
-*.keras
-*.ckpt
-artifacts/
-wandb/
+### Python build / packaging ###
+build/
+dist/
+*.egg-info/
 
-### Secrets — NEVER commit these ###
+### Environment files ###
 .env
-application-secrets.properties
+.env.*
 
 ### OS ###
 .DS_Store
