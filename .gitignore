@@ -16,7 +16,6 @@ backend/src/main/resources/application-secrets.properties
 ### Python ###
 __pycache__/
 *.py[cod]
-*.class
 .venv/
 venv/
 env/
@@ -37,3 +36,23 @@ dist/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+### Medical Report Demystifier - dataset & model artifacts ###
+data/raw/
+data/processed/
+*.csv
+!data/splits/*.csv
+
+models/checkpoints/
+models/registry/
+models/final/
+*.h5
+*.keras
+*.ckpt
+
+outputs/figures/*.png
+outputs/gradcam/*.png
+outputs/metrics/*.json
+outputs/metrics/*.csv
+
+wandb/
