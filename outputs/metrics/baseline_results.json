@@ -1,0 +1,28 @@
+{
+  "run_name": "baseline-frozen-backbone",
+  "wandb_url": "https://wandb.ai/krati-chauhan-5482-noida-institute-of-engineering-technology/medical-report-demystifier/runs/8euoiicl",
+  "model": "DenseNet121 (ImageNet pretrained, frozen backbone)",
+  "training_config": {
+    "epochs_run": 10,
+    "epochs_max": 10,
+    "early_stopping_patience": 3,
+    "learning_rate_initial": 0.001,
+    "batch_size": 16,
+    "best_epoch": 7
+  },
+  "final_metrics": {
+    "note": "restore_best_weights=True means the saved checkpoint is from epoch 7, not epoch 10",
+    "train_auc_epoch10": 0.7322,
+    "train_loss_epoch10": 0.1531,
+    "train_accuracy_epoch10": 0.9550,
+    "val_auc_best_epoch7": 0.6970,
+    "val_loss_epoch7": 0.1614,
+    "val_accuracy_epoch7": 0.9575
+  },
+  "interpretation": [
+    "Accuracy (~95%) is misleading here due to severe class imbalance (most labels are rare) - AUC is the meaningful metric.",
+    "AUC 0.697 is a reasonable frozen-backbone baseline: better than random (0.5) but limited because ImageNet-pretrained features are generic and not adapted to chest X-ray imagery.",
+    "Val AUC plateaued after epoch 7, triggering early stopping at epoch 10 - motivates Phase 7 fine-tuning (unfreezing backbone layers).",
+    "Checkpoint saved at models/checkpoints/baseline_best.keras (not committed to git per .gitignore - see W&B run for full curves)."
+  ]
+}
