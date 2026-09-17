@@ -51,8 +51,12 @@ models/final/
 *.ckpt
 
 outputs/figures/*.png
+!outputs/figures/class_distribution.png
+!outputs/figures/multilabel_frequency.png
+!outputs/figures/sample_batch_preview.png
 outputs/gradcam/*.png
 outputs/metrics/*.json
+!outputs/metrics/baseline_results.json
 outputs/metrics/*.csv
 
 wandb/
