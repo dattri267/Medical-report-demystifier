@@ -54,10 +54,13 @@ outputs/figures/*.png
 !outputs/figures/class_distribution.png
 !outputs/figures/multilabel_frequency.png
 !outputs/figures/sample_batch_preview.png
+!outputs/figures/roc_curves.png
 outputs/gradcam/*.png
 outputs/metrics/*.json
 !outputs/metrics/baseline_results.json
 !outputs/metrics/finetune_results.json
 outputs/metrics/*.csv
+outputs/metrics/*.csv
+!outputs/metrics/test_evaluation.csv
 
 wandb/
