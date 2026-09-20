@@ -35,7 +35,8 @@ EPOCHS = 10
 LEARNING_RATE = 1e-3
 FINETUNE_LEARNING_RATE = 1e-5  # ~100x smaller - gentle nudges, not overwrites
 FINETUNE_EPOCHS = 10
-FINETUNE_UNFREEZE_LAYERS = 30
+FINETUNE_UNFREEZE_LAYERS = 15
+FINETUNE_DROPOUT_RATE = 0.5
 EARLY_STOPPING_PATIENCE = 3
 
 
@@ -75,7 +76,8 @@ def main(quick: bool = False, finetune: bool = False):
                 "No baseline checkpoint found. Run `python -m vision.train` "
                 "(Phase 6, without --finetune) first to produce baseline_best.keras."
             )
-        model = tf.keras.models.load_model(BASELINE_CHECKPOINT_PATH)
+        model = build_model(freeze_backbone=True, dropout_rate=FINETUNE_DROPOUT_RATE)
+        model.load_weights(BASELINE_CHECKPOINT_PATH)
 
         print(f"Unfreezing top {FINETUNE_UNFREEZE_LAYERS} backbone layers...")
         model = unfreeze_top_backbone_layers(model, num_layers=FINETUNE_UNFREEZE_LAYERS)
