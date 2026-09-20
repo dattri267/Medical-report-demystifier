@@ -22,25 +22,12 @@ from vision.constants import NUM_CLASSES, IMAGE_SIZE
 def build_model(freeze_backbone: bool = True, dropout_rate: float = 0.3) -> tf.keras.Model:
     """
     Build the DenseNet121 baseline model.
-
-    Args:
-        freeze_backbone: if True, DenseNet121's pretrained weights are
-            frozen (not updated during training) - used for the initial
-            baseline. Set False later during Phase 7 fine-tuning.
-        dropout_rate: dropout applied before the final classification
-            layer, to reduce overfitting on our relatively small dataset.
-
-    Returns:
-        A compiled tf.keras.Model ready for training.
     """
-    # Load DenseNet121 with ImageNet pretrained weights.
-    # include_top=False strips off the original 1000-class ImageNet
-    # classification head - we're replacing it with our own 14-class head.
     base_model = tf.keras.applications.DenseNet121(
         include_top=False,
         weights="imagenet",
         input_shape=(IMAGE_SIZE, IMAGE_SIZE, 3),
-        pooling=None,  # we add our own pooling layer below
+        pooling=None,
     )
 
     base_model.trainable = not freeze_backbone
@@ -48,16 +35,8 @@ def build_model(freeze_backbone: bool = True, dropout_rate: float = 0.3) -> tf.k
     inputs = tf.keras.Input(shape=(IMAGE_SIZE, IMAGE_SIZE, 3))
     x = base_model(inputs, training=False if freeze_backbone else None)
 
-    # GlobalAveragePooling collapses each feature map to a single number
-    # (its average), turning DenseNet's spatial feature maps into a flat
-    # vector the Dense layer can use - far fewer parameters than Flatten,
-    # and more robust to exactly where in the image a feature appears.
     x = layers.GlobalAveragePooling2D()(x)
-
     x = layers.Dropout(dropout_rate)(x)
-
-    # 14 independent sigmoid outputs - one probability per disease,
-    # NOT a softmax (which would incorrectly force them to sum to 1).
     outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
     model = models.Model(inputs, outputs, name="chestxray_densenet121")
@@ -65,22 +44,64 @@ def build_model(freeze_backbone: bool = True, dropout_rate: float = 0.3) -> tf.k
     return model
 
 
-def compile_model(model: tf.keras.Model, learning_rate: float = 1e-3) -> tf.keras.Model:
+def compile_model(model: tf.keras.Model, learning_rate: float = 1e-3,
+                   use_focal_loss: bool = False) -> tf.keras.Model:
     """
     Compile the model with an appropriate optimizer, loss, and metrics
     for multi-label classification.
 
-    binary_crossentropy is used (not categorical_crossentropy) because
-    each of the 14 outputs is treated as an independent binary decision.
+    Args:
+        use_focal_loss: if True, uses focal loss instead of plain
+            binary_crossentropy. Focal loss down-weights "easy" examples
+            (where the model is already confident and correct) and keeps
+            full gradient signal on "hard" examples - directly helping
+            with the severe class imbalance found in Phase 3's EDA
+            (e.g. Hernia: 26 positives vs Infiltration: 1,032).
     """
+    if use_focal_loss:
+        loss = tf.keras.losses.BinaryFocalCrossentropy(
+            apply_class_balancing=True,
+            alpha=0.25,
+            gamma=2.0,
+        )
+    else:
+        loss = "binary_crossentropy"
+
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-        loss="binary_crossentropy",
+        loss=loss,
         metrics=[
             tf.keras.metrics.AUC(name="auc", multi_label=True),
             tf.keras.metrics.BinaryAccuracy(name="accuracy"),
         ],
     )
+    return model
+
+
+def unfreeze_top_backbone_layers(model: tf.keras.Model, num_layers: int = 30) -> tf.keras.Model:
+    """
+    Unfreeze the top N layers of the DenseNet121 backbone for fine-tuning.
+
+    The earliest layers (generic edge/texture detectors) stay frozen since
+    they transfer well regardless of image domain. Only the LAST num_layers
+    layers - the more abstract, task-specific ones - become trainable,
+    so they can adapt to chest X-ray characteristics specifically.
+
+    Must be called AFTER compile_model with a much lower learning rate
+    (e.g. 1e-5), since these are pretrained weights we want to nudge
+    gently, not overwrite.
+    """
+    backbone = model.get_layer("densenet121")
+    backbone.trainable = True
+
+    for layer in backbone.layers[:-num_layers]:
+        layer.trainable = False
+    for layer in backbone.layers[-num_layers:]:
+        if isinstance(layer, tf.keras.layers.BatchNormalization):
+            layer.trainable = False
+        else:
+            layer.trainable = True
+
     return model
 
 
