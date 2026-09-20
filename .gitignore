@@ -57,6 +57,7 @@ outputs/figures/*.png
 outputs/gradcam/*.png
 outputs/metrics/*.json
 !outputs/metrics/baseline_results.json
+!outputs/metrics/finetune_results.json
 outputs/metrics/*.csv
 
 wandb/
