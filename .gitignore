@@ -56,6 +56,7 @@ outputs/figures/*.png
 !outputs/figures/sample_batch_preview.png
 !outputs/figures/roc_curves.png
 outputs/gradcam/*.png
+!outputs/gradcam/*_prob*.png
 outputs/metrics/*.json
 !outputs/metrics/baseline_results.json
 !outputs/metrics/finetune_results.json
