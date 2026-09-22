@@ -44,7 +44,8 @@ data/processed/
 !data/splits/*.csv
 
 models/checkpoints/
-models/registry/
+models/registry/*
+!models/registry/*.json
 models/final/
 *.h5
 *.keras
