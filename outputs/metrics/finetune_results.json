@@ -1,0 +1,35 @@
+{
+  "comparison": "baseline (Phase 6, frozen backbone) vs fine-tuned (Phase 7, partial unfreeze + focal loss)",
+  "baseline": {
+    "run_name": "baseline-frozen-backbone",
+    "trainable_params": 14350,
+    "best_val_auc": 0.6970,
+    "best_epoch": 7,
+    "wandb_url": "https://wandb.ai/krati-chauhan-5482-noida-institute-of-engineering-technology/medical-report-demystifier/runs/8euoiicl"
+  },
+  "finetune_attempt_1": {
+    "run_name": "finetuned-phase2",
+    "config": "30 unfrozen layers, dropout 0.3, focal loss, lr 1e-5",
+    "trainable_params": 645134,
+    "best_val_auc": 0.6976,
+    "best_epoch": 1,
+    "pattern": "val_auc declined every epoch after epoch 1 (0.698 -> 0.695 -> 0.691 -> 0.688) - classic overfitting signature",
+    "wandb_url": "https://wandb.ai/krati-chauhan-5482-noida-institute-of-engineering-technology/medical-report-demystifier/runs/g7gdhwhl"
+  },
+  "finetune_attempt_2": {
+    "run_name": "finetuned-phase2 (retry)",
+    "config": "15 unfrozen layers, dropout 0.5, focal loss, lr 1e-5",
+    "trainable_params": 337934,
+    "best_val_auc": 0.6964,
+    "best_epoch": 1,
+    "pattern": "same shape as attempt 1: peak at epoch 1, steady decline after (0.696 -> 0.693 -> 0.691 -> 0.691)",
+    "wandb_url": "https://wandb.ai/krati-chauhan-5482-noida-institute-of-engineering-technology/medical-report-demystifier/runs/qyc28e67"
+  },
+  "honest_conclusion": [
+    "Fine-tuning did NOT meaningfully improve over the frozen-backbone baseline in either configuration tested (0.696-0.698 vs baseline's 0.697 - differences are within noise).",
+    "Both fine-tuning configs show the identical pattern: best result at epoch 1, immediate decline afterward - halving trainable parameters (645K -> 338K) and raising dropout (0.3 -> 0.5) did not change this pattern, suggesting the limitation is not primarily about model capacity/overfitting from too many parameters.",
+    "Most likely explanation: ~7,035 training images is not enough data for DenseNet121's upper layers to genuinely adapt to chest X-ray characteristics beyond what the frozen ImageNet features already capture, at least at this learning rate and layer-unfreezing depth.",
+    "Decision: proceeding to Phase 8 evaluation with BOTH checkpoints (baseline_best.keras and finetuned_best.keras) for a full per-class comparison, rather than continuing to tune hyperparameters against this same small validation set (1,500 images), which risks overfitting the validation set itself through repeated manual adjustment.",
+    "This is a legitimate, reportable finding - not a failure. Possible future directions (not pursued here due to time/data constraints): more training data (pull additional NIH archives), unfreezing fewer/different layers, or a lower fine-tuning learning rate."
+  ]
+}

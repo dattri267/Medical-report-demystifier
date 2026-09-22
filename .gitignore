@@ -44,19 +44,27 @@ data/processed/
 !data/splits/*.csv
 
 models/checkpoints/
-models/registry/
+models/registry/*
+!models/registry/*.json
 models/final/
 *.h5
 *.keras
 *.ckpt
 
 outputs/figures/*.png
+outputs/figures/*.png
 !outputs/figures/class_distribution.png
 !outputs/figures/multilabel_frequency.png
 !outputs/figures/sample_batch_preview.png
+!outputs/figures/roc_curves.png
+!outputs/figures/reliability_diagram.png
 outputs/gradcam/*.png
+!outputs/gradcam/*_prob*.png
 outputs/metrics/*.json
 !outputs/metrics/baseline_results.json
+!outputs/metrics/finetune_results.json
 outputs/metrics/*.csv
+!outputs/metrics/test_evaluation.csv
+!outputs/metrics/calibration_results.csv
 
 wandb/
