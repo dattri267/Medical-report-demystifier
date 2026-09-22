@@ -1,0 +1,2 @@
+fitted_temperature,ece_before_calibration,ece_after_calibration,note
+1.0980026179709106,0.015911703838068416,0.01471877253226729,"Calibration improves probability trustworthiness. It does NOT improve or validate medical accuracy - AUC/ranking performance is unchanged by temperature scaling, since it's a monotonic transformation applied per-class."
