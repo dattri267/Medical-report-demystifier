@@ -9,4 +9,6 @@ opencv-python
 scikit-multilearn
 wandb
 pyyaml
-jupyter
+jupyterfastapi
+uvicorn
+python-multipart
