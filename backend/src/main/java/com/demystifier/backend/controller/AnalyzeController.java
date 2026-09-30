@@ -1,9 +1,13 @@
 package com.demystifier.backend.controller;
 
 import com.demystifier.backend.dto.AnalyzeResponse;
+import com.demystifier.backend.dto.DiscrepancyDto;
 import com.demystifier.backend.dto.VisionResultDto;
+import com.demystifier.backend.service.DiscrepancyService;
+import com.demystifier.backend.service.ReviewQueueService;
 import com.demystifier.backend.service.TextEngineClient;
 import com.demystifier.backend.service.VisionClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,16 +17,24 @@ public class AnalyzeController {
 
     private final TextEngineClient textEngineClient;
     private final VisionClient visionClient;
+    private final DiscrepancyService discrepancyService;
+    private final ReviewQueueService reviewQueueService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AnalyzeController(TextEngineClient textEngineClient, VisionClient visionClient) {
+    public AnalyzeController(TextEngineClient textEngineClient,
+            VisionClient visionClient,
+            DiscrepancyService discrepancyService,
+            ReviewQueueService reviewQueueService) {
         this.textEngineClient = textEngineClient;
         this.visionClient = visionClient;
+        this.discrepancyService = discrepancyService;
+        this.reviewQueueService = reviewQueueService;
     }
 
     @PostMapping(consumes = "multipart/form-data")
     public AnalyzeResponse analyzeMultipart(
             @RequestParam(value = "reportText", required = false) String reportText,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @RequestParam(value = "image", required = false) MultipartFile image) throws Exception {
 
         AnalyzeResponse response = new AnalyzeResponse();
 
@@ -35,11 +47,19 @@ public class AnalyzeController {
             response.setVisionResult(visionResult);
         }
 
+        if (response.getVisionResult() != null && response.getTextResult() != null) {
+            DiscrepancyDto discrepancy = discrepancyService.check(response.getVisionResult(), response.getTextResult());
+            response.setDiscrepancy(discrepancy);
+
+            if (discrepancy.isFlagged()) {
+                String payloadJson = objectMapper.writeValueAsString(response);
+                reviewQueueService.flagCase(payloadJson, discrepancy.getReason(), "HIGH");
+            }
+        }
+
         return response;
     }
 
-    // Keep the original JSON-only endpoint for pure text testing (Postman
-    // convenience)
     @PostMapping(consumes = "application/json")
     public AnalyzeResponse analyzeJson(@RequestBody com.demystifier.backend.dto.AnalyzeRequest request) {
         AnalyzeResponse response = new AnalyzeResponse();
